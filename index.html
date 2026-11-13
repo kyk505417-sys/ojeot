@@ -20,9 +20,9 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 .head p{margin:2px 0 0;font-size:13px;color:var(--muted)}
 .tip{background:linear-gradient(135deg,#fff3f8,#eef9ff);border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.5;box-shadow:0 3px 0 var(--line);margin-bottom:12px}
 .tip b{color:var(--pink-d);font-weight:400}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;margin:0 -2px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0 10px;justify-content:center}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:0;border-radius:99px;padding:8px 13px;background:#fff;box-shadow:0 2px 0 var(--line);font-size:15px;white-space:nowrap}
+.chip{flex:none;border:0;border-radius:99px;padding:9px 13px;touch-action:manipulation;min-height:40px;background:#fff;box-shadow:0 2px 0 var(--line);font-size:15px;white-space:nowrap}
 .chip[aria-pressed="true"]{background:var(--pink);color:#fff;box-shadow:0 2px 0 var(--pink-d)}
 .chip.gg[aria-pressed="false"]{background:#fff6e0}
 .wheelbox{position:relative;width:min(100%,320px);margin:6px auto 0;aspect-ratio:1/1}
