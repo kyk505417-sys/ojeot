@@ -26,7 +26,7 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 .chip[aria-pressed="true"]{background:var(--pink);color:#fff;box-shadow:0 2px 0 var(--pink-d)}
 .chip.gg[aria-pressed="false"]{background:#fff6e0}
 .wheelbox{position:relative;width:min(100%,320px);margin:6px auto 0;aspect-ratio:1/1}
-.wheelbox svg.w{width:100%;height:100%;display:block;transition:transform 4s cubic-bezier(.15,.9,.2,1)}
+.wheelbox svg.w{width:100%;height:100%;display:block}
 .pin{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:34px;z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15))}
 .hub{position:absolute;left:50%;top:50%;width:30%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;background:#fff;border:4px solid #fff;box-shadow:0 0 0 3px #e3d6f5,0 6px 14px rgba(120,90,160,.25);display:grid;place-items:center;border:0;padding:0;z-index:2}
 .hub img{width:62%}
@@ -267,13 +267,21 @@ function drawWheel(){let p=pool(S.cat);
  h+=`<circle r="96" fill="none" stroke="#e3d6f5" stroke-width="4"/>`;
  for(let i=0;i<24;i++){const d=i*15*Math.PI/180;h+=`<circle cx="${(97*Math.cos(d)).toFixed(1)}" cy="${(97*Math.sin(d)).toFixed(1)}" r="1.8" fill="${i%2?"#ffb3c7":"#fff"}"/>`}
  W.innerHTML=h;$("wnote").textContent=`${CNAME[S.cat]} · ${p.length}가지 메뉴${S.fav.length?" · 하트 메뉴는 칸이 두 배":""}`}
-function spin(){if(spinning||!slices.length)return;ac();spinning=true;$("spin").disabled=true;$("hub").classList.add("spin");
+let mode="idle",raf=0,autoT=0,lastT=0,lastTick=0;
+function setBtn(){const b=$("spin");b.disabled=!slices.length||mode==="stopping";b.textContent=mode==="spin"?"멈춰!":mode==="stopping"?"두근두근…":"돌려라 돌려!";b.classList.toggle("lamp",mode==="spin")}
+function spin(){if(!slices.length)return;ac();
+ if(mode==="spin")return stopSpin();if(mode!=="idle")return;
+ mode="spin";spinning=true;$("hub").classList.add("spin");setBtn();
+ const W=$("wheel");W.style.transition="none";lastT=performance.now();lastTick=rot;
+ const loop=t=>{const dt=Math.min(50,t-lastT);lastT=t;rot+=dt*0.75;W.style.transform=`rotate(${rot}deg)`;if(rot-lastTick>=30){lastTick=rot;tick()}if(mode==="spin")raf=requestAnimationFrame(loop)};
+ raf=requestAnimationFrame(loop);autoT=setTimeout(()=>{if(mode==="spin")stopSpin()},10000)}
+function stopSpin(){if(mode!=="spin")return;mode="stopping";cancelAnimationFrame(raf);clearTimeout(autoT);setBtn();
  const tot=slices.reduce((a,x)=>a+x.w,0);let r=Math.random()*tot,win=slices[0];for(const x of slices){if((r-=x.w)<=0){win=x;break}}
  const mid=(win.a0+win.a1)/2+(Math.random()-.5)*(win.a1-win.a0)*.6; // pointer is at -90deg
- const target=-90-mid;let cur=((rot%360)+360)%360;let delta=((target-cur)%360+360)%360;rot+=360*5+delta;
- $("wheel").style.transform=`rotate(${rot}deg)`;
- let n=0;const iv=setInterval(()=>{tick();if(++n>26)clearInterval(iv)},Math.max(60,40+n*6));
- setTimeout(()=>{spinning=false;$("spin").disabled=false;$("hub").classList.remove("spin");result(win)},4100)}
+ const cur=((rot%360)+360)%360;let delta=((-90-mid-cur)%360+360)%360;if(delta<200)delta+=360;const end=rot+delta;
+ const W=$("wheel");W.getBoundingClientRect();W.style.transition="transform 1.9s cubic-bezier(.15,.85,.3,1)";rot=end;W.style.transform=`rotate(${rot}deg)`;
+ [0,90,190,300,430,580,760,980,1250,1580].forEach(ms=>setTimeout(tick,ms));
+ setTimeout(()=>{mode="idle";spinning=false;$("hub").classList.remove("spin");W.style.transition="none";setBtn();result(win)},1950)}
 function result(x){fanfare();fireworks();const m=document.createElement("div");m.className="modal";const gg=x.c==="gg";const ch=C;
  m.innerHTML=`<div class="res" role="dialog" aria-label="오늘의 메뉴"><img src="${IMG[ch]}" alt=""><div class="cat">${CNAME[x.c]}</div><h2>${x.n}</h2>
   <div class="row"><a class="btn sm mint" href="${map((gg?"강경 ":"")+x.n)}" target="_blank" rel="noopener">${gg?"강경에서 찾기":"근처 가게 찾기"}</a>${gg?`<a class="btn sm lamp" href="${WALK}" target="_blank" rel="noopener">강경 산책 게임</a>`:""}</div>
