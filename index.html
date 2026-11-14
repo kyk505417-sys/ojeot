@@ -127,6 +127,14 @@ button.lk{width:100%;border:0;text-align:left;font:inherit;color:inherit}
 .trio{display:flex;align-items:flex-end;width:78px;flex:none}
 .trio img{width:30px!important;margin-right:-6px}
 .trio img:nth-child(2){width:34px!important}
+.cpbtn{margin-left:auto;flex:none;background:var(--pink);color:#fff;border-radius:99px;padding:7px 12px;font-size:13px;box-shadow:0 3px 0 var(--pink-d)}
+.cpbtn.got{background:#fff0f5;color:var(--pink-d);box-shadow:none}
+.exb{display:inline-block;font-size:10px;background:#f3ecff;color:var(--muted);border-radius:99px;padding:1px 7px;margin-left:4px;vertical-align:2px}
+.code{font-size:34px;letter-spacing:2px;color:var(--ink);background:#fff;border:3px dashed #ffb8cc;border-radius:16px;padding:10px 6px;margin:10px 0 6px;font-variant-numeric:tabular-nums}
+.cpinfo{font-size:14px;line-height:1.6;color:var(--ink)}
+.cpinfo small{display:block;font-size:12px;color:var(--muted)}
+.mv{border-radius:18px;overflow:hidden;aspect-ratio:16/9;background:#2d2540;box-shadow:0 3px 0 var(--line)}
+.mv iframe{width:100%;height:100%;border:0;display:block}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -159,13 +167,17 @@ button.lk{width:100%;border:0;text-align:left;font:inherit;color:inherit}
     <div class="links" id="intro3"></div>
     <div class="sec">게임</div>
     <div class="links" id="games"></div>
+    <div class="sec">뮤직비디오</div>
+    <div class="mv"><iframe src="https://www.youtube-nocookie.com/embed/Mn-b-pKzQjc?rel=0&playsinline=1&loop=1&playlist=Mn-b-pKzQjc" title="짭짤한 녀석들 뮤직비디오" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    <p class="note"><a href="https://youtu.be/Mn-b-pKzQjc" target="_blank" rel="noopener" style="color:var(--pink-d)">유튜브에서 보기 · 구독도 꾹!</a></p>
     <div class="sec">짭짤한 녀석들 채널</div>
     <div class="links" id="brand"></div>
   </section>
 
   <section id="pTrip" hidden>
     <div class="sec">강경 놀러 가기</div>
-    <div class="coupon"><span class="tag">제휴 준비 중</span><b>키링 혜택 가게</b><small>강경 가게에서 키링 화면을 보여 주면 혜택을 받는 제휴를 준비하고 있어요. 함께할 가게를 모집 중!</small><a class="btn sm" href="mailto:kyk5054@naver.com?subject=%5B%EC%A7%AD%EC%A7%A4%ED%95%9C%20%EB%85%80%EC%84%9D%EB%93%A4%5D%20%EC%A0%9C%ED%9C%B4%20%EB%AC%B8%EC%9D%98">제휴 문의하기</a><img id="cpImg" alt=""></div>
+    <div class="coupon"><span class="tag" id="cpTag">제휴 준비 중</span><b>키링 혜택 가게</b><small id="cpMsg">강경 가게에서 키링 화면을 보여 주면 혜택을 받는 제휴를 준비하고 있어요. 함께할 가게를 모집 중!</small><a class="btn sm" href="mailto:kyk5054@naver.com?subject=%5B%EC%A7%AD%EC%A7%A4%ED%95%9C%20%EB%85%80%EC%84%9D%EB%93%A4%5D%20%EC%A0%9C%ED%9C%B4%20%EB%AC%B8%EC%9D%98">제휴 문의하기</a><img id="cpImg" alt=""></div>
+    <div class="links" id="cpList" style="margin-bottom:12px"></div>
     <div class="links" id="trip"></div>
     <p class="note">누르면 네이버 지도에서 위치가 열려요</p>
   </section>
@@ -365,6 +377,28 @@ const TABS=[["pEat","뭐 먹지",`<svg viewBox="-14 -14 28 28"><path d="M-11 -1 
 let tab="pEat";
 function drawTabs(){$("tabbar").innerHTML=TABS.map(([id,n,ic])=>`<button role="tab" aria-selected="${tab===id}" data-t="${id}">${ic}<span>${n}</span></button>`).join("");
  $("tabbar").querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;TABS.forEach(([id])=>$(id).hidden=id!==tab);if(tab==="pEdit")drawEdit();if(tab==="pEat")drawWheel();drawTabs();scrollTo(0,0)}))}
+// ===== 제휴 쿠폰 (partners.json, 쿠폰 받을 때마다 번호 자동 생성)
+const PARTNER_URL="https://kyk505417-sys.github.io/ojeot/partners.json";
+let PARTNERS=[];
+const todayStr=()=>{const d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)};
+function cpStore(){try{return JSON.parse(localStorage.getItem("ojeot-coupons")||"{}")}catch(e){return {}}}
+function cpSave(o){try{localStorage.setItem("ojeot-coupons",JSON.stringify(o))}catch(e){}}
+function cpCode(p){const t=todayStr(),st=cpStore(),k=(p["코드"]||"XX")+"|"+t;if(st[k])return {code:st[k],old:true};
+ const used=new Set(Object.values(st));let c;do{c="OJ-"+String(p["코드"]||"XX").toUpperCase()+"-"+String(1000+Math.floor(Math.random()*9000))}while(used.has(c));
+ st[k]=c;const keep={};Object.keys(st).forEach(x=>{if(x.split("|")[1]>=t)keep[x]=st[x]});keep[k]=c;cpSave(keep);return {code:c,old:false}}
+function drawCoupons(){const L=$("cpList");if(!PARTNERS.length){L.innerHTML="";return}
+ $("cpTag").textContent="키링 혜택";$("cpMsg").textContent="가게에서 쿠폰 번호 화면을 보여 주세요. 하루에 한 번, 가게마다 받을 수 있어요.";
+ const st=cpStore(),t=todayStr();
+ L.innerHTML=PARTNERS.map((p,i)=>{const got=st[(p["코드"]||"XX")+"|"+t];return `<button class="lk" data-cp="${i}"><span class="ic">${PIN("#ffb8cc")}</span><div><b></b><small></small></div><span class="cpbtn ${got?"got":""}">${got?"내 쿠폰":"쿠폰 받기"}</span></button>`}).join("");
+ L.querySelectorAll("[data-cp]").forEach(b=>{const p=PARTNERS[+b.dataset.cp];b.querySelector("b").textContent=p["이름"]||"제휴 가게";if(p["예시"]){const e=document.createElement("span");e.className="exb";e.textContent="예시";b.querySelector("b").appendChild(e)}b.querySelector("small").textContent=p["혜택"]||"";b.addEventListener("click",()=>openCoupon(p))})}
+function openCoupon(p){ac();const r=cpCode(p);const m=document.createElement("div");m.className="modal";
+ m.innerHTML=`<div class="res" role="dialog" aria-label="쿠폰"><img src="${IMG[C]}" alt=""><div class="cat"></div><h2 style="font-size:26px"></h2><div class="code"></div>
+  <div class="cpinfo"><span class="ben"></span><small>${todayStr().replace(/-/g,".")} 오늘만 사용 · 가게에서 이 화면을 보여 주세요</small></div>
+  <div class="row">${p["장소검색"]?`<a class="btn sm mint" href="${map(p["장소검색"])}" target="_blank" rel="noopener">가게 길찾기</a>`:""}<button class="btn sm" id="cpok">닫기</button></div></div>`;
+ m.querySelector(".cat").textContent=p["예시"]?"키링 쿠폰 (예시)":"키링 쿠폰";m.querySelector("h2").textContent=p["이름"]||"";m.querySelector(".code").textContent=r.code;m.querySelector(".ben").textContent=p["혜택"]||"";
+ document.body.appendChild(m);m.addEventListener("click",e=>{if(e.target===m)m.remove()});$("cpok").addEventListener("click",()=>m.remove());
+ if(!r.old){fanfare();ono(pick(CH[C].ono),innerWidth/2,innerHeight*.25)}drawCoupons()}
+try{fetch(PARTNER_URL+"?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(d=>{if(Array.isArray(d)){PARTNERS=d.filter(p=>p&&p["이름"]&&(!p["끝"]||p["끝"]>=todayStr()));drawCoupons()}}).catch(()=>{})}catch(e){}
 $("brand").innerHTML=[["스마트스토어","짭짤한 녀석들 굿즈 구경하기","https://naver.me/FXn7MTvl","#9adbb8"],["인스타그램","@lotus.b612","https://www.instagram.com/lotus.b612/","#ffb8cc"],["제휴 문의","kyk5054@naver.com","mailto:kyk5054@naver.com?subject="+encodeURIComponent("[짭짤한 녀석들] 제휴 문의"),"#c9b6ff"]].map(([t,s,u,c])=>`<a class="lk" href="${u}" target="_blank" rel="noopener"><span class="ic">${PIN(c)}</span><div><b>${t}</b><small>${s}</small></div><span class="arr">›</span></a>`).join("");
 setChar(C);drawChips();drawWheel();drawTabs();
 })();
