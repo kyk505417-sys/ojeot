@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8">
+<html lang="ko"><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-CYZP4V19JV"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-CYZP4V19JV");</script><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>오늘 뭐 먹지</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -387,7 +387,7 @@ function cpCode(p){const t=todayStr(),st=cpStore(),k=(p["코드"]||"XX")+"|"+t;i
  const used=new Set(Object.values(st));let c;do{c="OJ-"+String(p["코드"]||"XX").toUpperCase()+"-"+String(1000+Math.floor(Math.random()*9000))}while(used.has(c));
  st[k]=c;const keep={};Object.keys(st).forEach(x=>{if(x.split("|")[1]>=t)keep[x]=st[x]});keep[k]=c;cpSave(keep);return {code:c,old:false}}
 function drawCoupons(){const L=$("cpList");if(!PARTNERS.length){L.innerHTML="";return}
- $("cpTag").textContent="키링 혜택";$("cpMsg").textContent="가게에서 쿠폰 번호 화면을 보여 주세요. 하루에 한 번, 가게마다 받을 수 있어요.";
+ $("cpTag").textContent="키링 혜택";$("cpMsg").textContent="가게에서 쿠폰 번호 화면을 보여 주세요. 가게마다 1인 1일 1장 받을 수 있어요.";
  const st=cpStore(),t=todayStr();
  L.innerHTML=PARTNERS.map((p,i)=>{const got=st[(p["코드"]||"XX")+"|"+t];return `<button class="lk" data-cp="${i}"><span class="ic">${PIN("#ffb8cc")}</span><div><b></b><small></small></div><span class="cpbtn ${got?"got":""}">${got?"내 쿠폰":"쿠폰 받기"}</span></button>`}).join("");
  L.querySelectorAll("[data-cp]").forEach(b=>{const p=PARTNERS[+b.dataset.cp];b.querySelector("b").textContent=p["이름"]||"제휴 가게";if(p["예시"]){const e=document.createElement("span");e.className="exb";e.textContent="예시";b.querySelector("b").appendChild(e)}b.querySelector("small").textContent=p["혜택"]||"";b.addEventListener("click",()=>openCoupon(p))})}
@@ -397,7 +397,7 @@ function openCoupon(p){ac();const r=cpCode(p);const m=document.createElement("di
   <div class="row">${p["장소검색"]?`<a class="btn sm mint" href="${map(p["장소검색"])}" target="_blank" rel="noopener">가게 길찾기</a>`:""}<button class="btn sm" id="cpok">닫기</button></div></div>`;
  m.querySelector(".cat").textContent=p["예시"]?"키링 쿠폰 (예시)":"키링 쿠폰";m.querySelector("h2").textContent=p["이름"]||"";m.querySelector(".code").textContent=r.code;m.querySelector(".ben").textContent=p["혜택"]||"";
  document.body.appendChild(m);m.addEventListener("click",e=>{if(e.target===m)m.remove()});$("cpok").addEventListener("click",()=>m.remove());
- if(!r.old){fanfare();ono(pick(CH[C].ono),innerWidth/2,innerHeight*.25)}drawCoupons()}
+ if(!r.old){try{gtag("event","coupon_issue",{shop:p["코드"]||"XX"})}catch(e){}fanfare();ono(pick(CH[C].ono),innerWidth/2,innerHeight*.25)}drawCoupons()}
 try{fetch(PARTNER_URL+"?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(d=>{if(Array.isArray(d)){PARTNERS=d.filter(p=>p&&p["이름"]&&(!p["끝"]||p["끝"]>=todayStr()));drawCoupons()}}).catch(()=>{})}catch(e){}
 $("brand").innerHTML=[["스마트스토어","짭짤한 녀석들 굿즈 구경하기","https://naver.me/FXn7MTvl","#9adbb8"],["인스타그램","@lotus.b612","https://www.instagram.com/lotus.b612/","#ffb8cc"],["제휴 문의","kyk5054@naver.com","mailto:kyk5054@naver.com?subject="+encodeURIComponent("[짭짤한 녀석들] 제휴 문의"),"#c9b6ff"]].map(([t,s,u,c])=>`<a class="lk" href="${u}" target="_blank" rel="noopener"><span class="ic">${PIN(c)}</span><div><b>${t}</b><small>${s}</small></div><span class="arr">›</span></a>`).join("");
 setChar(C);drawChips();drawWheel();drawTabs();
