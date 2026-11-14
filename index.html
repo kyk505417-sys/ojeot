@@ -136,6 +136,7 @@ button.lk{width:100%;border:0;text-align:left;font:inherit;color:inherit}
 .mv{border-radius:18px;overflow:hidden;aspect-ratio:16/9;background:#2d2540;box-shadow:0 3px 0 var(--line)}
 .mv iframe{width:100%;height:100%;border:0;display:block}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.svy{display:block;margin-top:12px;font-size:14px;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 </style>
 
 <div class="app">
@@ -297,7 +298,7 @@ function stopSpin(){if(mode!=="spin")return;mode="stopping";cancelAnimationFrame
 function result(x){fanfare();fireworks();const m=document.createElement("div");m.className="modal";const gg=x.c==="gg";const ch=C;
  m.innerHTML=`<div class="res" role="dialog" aria-label="오늘의 메뉴"><img src="${IMG[ch]}" alt=""><div class="cat">${CNAME[x.c]}</div><h2>${x.n}</h2>
   <div class="row"><a class="btn sm mint" href="${map((gg?"강경 ":"")+x.n)}" target="_blank" rel="noopener">${gg?"강경에서 찾기":"근처 가게 찾기"}</a>${gg?`<a class="btn sm lamp" href="${WALK}" target="_blank" rel="noopener">강경 산책 게임</a>`:""}</div>
-  <div class="row"><button class="btn sm ghost" id="again">다시 돌리기</button><button class="btn sm" id="ok">이걸로 결정!</button></div></div>`;
+  <div class="row"><button class="btn sm ghost" id="again">다시 돌리기</button><button class="btn sm" id="ok">이걸로 결정!</button></div><a class="svy" href="https://forms.gle/K4hCWNVkwNSDe31j8" target="_blank" rel="noopener" onclick="try{gtag('event','survey_click',{from:'result'})}catch(e){}">📝 1분 설문 참여하기</a></div>`;
  document.body.appendChild(m);setTimeout(()=>ono(pick(CH[C].ono),innerWidth/2,innerHeight*.28),150);
  m.addEventListener("click",e=>{if(e.target===m)m.remove()});
  $("again").addEventListener("click",()=>{m.remove();spin()});$("ok").addEventListener("click",()=>{m.remove();ono("결정!",innerWidth/2,innerHeight*.4,"#f0b23e")})}
@@ -399,7 +400,7 @@ function openCoupon(p){ac();const r=cpCode(p);const m=document.createElement("di
  document.body.appendChild(m);m.addEventListener("click",e=>{if(e.target===m)m.remove()});$("cpok").addEventListener("click",()=>m.remove());
  if(!r.old){try{gtag("event","coupon_issue",{shop:p["코드"]||"XX"})}catch(e){}fanfare();ono(pick(CH[C].ono),innerWidth/2,innerHeight*.25)}drawCoupons()}
 try{fetch(PARTNER_URL+"?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(d=>{if(Array.isArray(d)){PARTNERS=d.filter(p=>p&&p["이름"]&&(!p["끝"]||p["끝"]>=todayStr()));drawCoupons()}}).catch(()=>{})}catch(e){}
-$("brand").innerHTML=[["스마트스토어","짭짤한 녀석들 굿즈 구경하기","https://naver.me/FXn7MTvl","#9adbb8"],["인스타그램","@lotus.b612","https://www.instagram.com/lotus.b612/","#ffb8cc"],["제휴 문의","kyk5054@naver.com","mailto:kyk5054@naver.com?subject="+encodeURIComponent("[짭짤한 녀석들] 제휴 문의"),"#c9b6ff"]].map(([t,s,u,c])=>`<a class="lk" href="${u}" target="_blank" rel="noopener"><span class="ic">${PIN(c)}</span><div><b>${t}</b><small>${s}</small></div><span class="arr">›</span></a>`).join("");
+$("brand").innerHTML=[["📝 1분 설문","오젓군 앱 써 보고 의견 남기기","https://forms.gle/K4hCWNVkwNSDe31j8","#ffe7a8"],["스마트스토어","짭짤한 녀석들 굿즈 구경하기","https://naver.me/FXn7MTvl","#9adbb8"],["인스타그램","@lotus.b612","https://www.instagram.com/lotus.b612/","#ffb8cc"],["제휴 문의","kyk5054@naver.com","mailto:kyk5054@naver.com?subject="+encodeURIComponent("[짭짤한 녀석들] 제휴 문의"),"#c9b6ff"]].map(([t,s,u,c])=>`<a class="lk" href="${u}" target="_blank" rel="noopener"><span class="ic">${PIN(c)}</span><div><b>${t}</b><small>${s}</small></div><span class="arr">›</span></a>`).join("");
 setChar(C);drawChips();drawWheel();drawTabs();
 })();
 </script>
