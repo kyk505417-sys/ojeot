@@ -57,7 +57,8 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 .addrow{display:flex;gap:6px;margin-top:10px}
 .addrow input{flex:1;min-width:0;border:2px solid var(--line);border-radius:12px;padding:9px 12px;font-size:16px;background:#fff;outline:none}
 .addrow input:focus{border-color:var(--pink)}
-.legend{font-size:12px;color:var(--muted);margin:6px 2px 0;line-height:1.5}
+.legend{font-size:12px;color:var(--muted);margin:6px 2px 0;line-height:1.9}
+.legend .li svg{width:18px;height:18px;vertical-align:-4px;margin-right:2px}
 /* links */
 .links{display:grid;grid-template-columns:1fr;gap:10px}
 .lk{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 3px 0 var(--line);text-decoration:none;color:inherit}
@@ -171,7 +172,7 @@ button.lk{width:100%;border:0;text-align:left;font:inherit;color:inherit}
   <section id="pEdit" hidden>
     <div class="sec">내 메뉴 편집</div>
     <div class="etabs" id="etabs"></div>
-    <p class="legend">하트 = 좋아하는 음식(돌림판 칸이 두 배) · 엑스 = 싫어하는 음식(돌림판에서 빠져요) · 휴지통 = 메뉴 지우기(목록에서 완전히 사라져요, 되돌리기 버튼으로 복구). 편집한 내용은 이 폰에 저장돼요.</p>
+    <p class="legend" id="legend"></p>
     <ul class="items" id="items"></ul>
     <form class="addrow" id="addForm"><input id="addIn" maxlength="14" placeholder="먹고 싶은 메뉴 넣기" aria-label="새 메뉴 이름"><button class="btn sm" type="submit">넣기</button></form>
     <div class="go"><button class="btn sm ghost" id="resetCat">이 종류 처음 메뉴로 되돌리기</button></div>
@@ -250,7 +251,7 @@ function toast(t){document.querySelectorAll(".toast").forEach(e=>e.remove());con
 const TIPS=[
  "강경은 옛날 <b>조선 3대 시장</b> 중 하나로 불릴 만큼 북적이던 곳이에요.",
  "<b>옥녀봉</b>에 오르면 금강과 강경 시내가 한눈에 보여요. 노을 맛집!",
- "가을이 되면 <b>강경젓갈축제</b>가 열려요. 젓갈 시장 구경은 언제든 가능해요.",
+ "가을이 되면 <b>강경젓갈축제</b>가 열려요.<br>시장 구경은 언제든 가능해요.",
  "강경 <b>근대역사문화거리</b>에는 옛 은행·약방 같은 근대 건물이 남아 있어요.",
  "젓갈은 짭짤하니까 <b>흰 쌀밥</b>이랑 먹으면 최고예요. 오늘은 밥 한 공기 더?",
  "오젓군은 오징어젓, 꼴뚜링은 꼴뚜기젓, 명란아씨는 명란젓에서 왔어요.",
@@ -322,10 +323,11 @@ $("spin").addEventListener("click",spin);$("hub").addEventListener("click",spin)
 // ===== edit
 let ecat="gg";
 const ICON={heart:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8 C-1.6 -8 0 -6 0 -4.4 C0 -6 1.6 -8 4 -8 C9 -8 11 1 0 8Z" fill="#ff8fab" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
- heartOff:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8 C-1.6 -8 0 -6 0 -4.4 C0 -6 1.6 -8 4 -8 C9 -8 11 1 0 8Z" fill="#fff" stroke="#c9b6ea" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
- x:`<svg viewBox="-12 -12 24 24"><path d="M-6 -6 L6 6 M6 -6 L-6 6" stroke="#a497bd" stroke-width="3" stroke-linecap="round"/></svg>`,
- trash:`<svg viewBox="-12 -12 24 24"><path d="M-7 -5 H7 M-3 -5 V-8 H3 V-5 M-5.5 -5 L-4.5 8 H4.5 L5.5 -5" fill="none" stroke="#a497bd" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`};
-function drawEdit(){$("etabs").innerHTML=CATS.filter(c=>c[0]!=="all").map(([k,n])=>`<button class="chip" aria-pressed="${ecat===k}" data-k="${k}">${n}</button>`).join("");
+ heartOff:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8 C-1.6 -8 0 -6 0 -4.4 C0 -6 1.6 -8 4 -8 C9 -8 11 1 0 8Z" fill="#fff0f5" stroke="#ff9fbf" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+ x:`<svg viewBox="-12 -12 24 24"><circle r="9.5" fill="#cfe4ff" stroke="${OL}" stroke-width="1.6"/><path d="M-4 -4 L4 4 M4 -4 L-4 4" stroke="#5b8fd9" stroke-width="2.8" stroke-linecap="round"/></svg>`,
+ trash:`<svg viewBox="-12 -12 24 24"><path d="M-6 -4 L-5 9 H5 L6 -4Z" fill="#c9f0d8" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/><rect x="-8" y="-7" width="16" height="3.4" rx="1.4" fill="#9fe0b9" stroke="${OL}" stroke-width="1.5"/><path d="M-2.5 -7 V-9.5 H2.5 V-7" fill="none" stroke="${OL}" stroke-width="1.5"/><path d="M-2 -1 V6 M2 -1 V6" stroke="#5cb88a" stroke-width="1.5" stroke-linecap="round"/></svg>`};
+function drawLegend(){const e=$("legend");if(!e||e.dataset.ok)return;e.dataset.ok=1;const I=k=>`<span class="li">${ICON[k]}</span>`;e.innerHTML=`${I("heart")} 좋아하는 음식 (돌림판 칸이 두 배)<br>${I("x")} 싫어하는 음식 (돌림판에서 빠져요)<br>${I("trash")} 메뉴 지우기 (되돌리기 버튼으로 복구)<br>편집한 내용은 이 폰에 저장돼요.`}
+function drawEdit(){drawLegend();$("etabs").innerHTML=CATS.filter(c=>c[0]!=="all").map(([k,n])=>`<button class="chip" aria-pressed="${ecat===k}" data-k="${k}">${n}</button>`).join("");
  $("etabs").querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{ecat=b.dataset.k;drawEdit()}));
  const mine=S.add[ecat]||[];
  $("items").innerHTML=menusOf(ecat).map(n=>{const f=S.fav.includes(n),x=S.ban.includes(n),own=mine.includes(n);return `<li class="${x?"ban":""}"><span>${n}</span>
