@@ -74,7 +74,8 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 .panel .row{margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .clock{font-size:26px;font-variant-numeric:tabular-nums;color:var(--pink-d)}
 .gauges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.g{background:var(--card);border-radius:14px;padding:7px 8px;box-shadow:0 3px 0 var(--line)}
+.g:active{transform:scale(.95)}
+.g{cursor:pointer;transition:transform .12s;background:var(--card);border-radius:14px;padding:7px 8px;box-shadow:0 3px 0 var(--line)}
 .g .lab{display:flex;justify-content:space-between;font-size:12px}
 .g .lab b{font-weight:400;font-variant-numeric:tabular-nums;color:var(--muted)}
 .g .bar{height:7px;border-radius:99px;background:#f3ecfb;margin-top:5px;overflow:hidden}
@@ -465,7 +466,8 @@ function dogMess(){const room=$("room");onoAt($("dog"),"와그작!","brown");for
   add({clean:-8});toast("강아지가 휴지를 물어뜯었어요! 조각을 눌러서 치워요")}
 // ================= gauges, menu, todo
 function drawTop(){$("cWho").innerHTML=`<img src="${IMG[W()]}" alt="">${NM[W()]}`;$("cDay").textContent=S.day+"일차";$("cStamp").textContent="도장 "+Math.min(S.stamps||0,7)+"/7";$("cTime").textContent=period(S.t)+" · "+clock(S.t);$("cWx").textContent=S.wx}
-function drawGauges(){$("gauges").innerHTML=Object.entries(GN).map(([k,[n,c]])=>`<div class="g"><div class="lab"><span>${n}</span><b>${S.g[k]}</b></div><div class="bar"><i style="width:${S.g[k]}%;background:${c}"></i></div></div>`).join("")}
+const GCAT={full:"eat",clean:"wash",mood:"play",hp:"rest"};
+function drawGauges(){$("gauges").innerHTML=Object.entries(GN).map(([k,[n,c]])=>`<div class="g" data-g="${k}" role="button" tabindex="0"><div class="lab"><span>${n}</span><b>${S.g[k]}</b></div><div class="bar"><i style="width:${S.g[k]}%;background:${c}"></i></div></div>`).join("");$("gauges").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{if(busy)return;if(S.out)return toast("먼저 방에 들어와요");cat=GCAT[b.dataset.g];try{SFX.pop()}catch(e){}drawMenu();$("menu").scrollIntoView({behavior:"smooth",block:"nearest"})})}
 const ICO={
  eat:`<path d="M-13 -2 L13 -2 Q12 12 0 12 Q-12 12 -13 -2Z" fill="#fff" ${S2}/><path d="M-11 -2 Q-6 -10 0 -8 Q6 -11 11 -2Z" fill="#fffdf4" ${S2}/>`,
  wash:`<path d="M-12 -2 L12 -2 Q11 12 0 12 Q-11 12 -12 -2Z" fill="#cfe8ff" ${S2}/><circle cx="-5" cy="-7" r="4" fill="#fff" ${S2}/><circle cx="3" cy="-10" r="5" fill="#fff" ${S2}/>`,
@@ -483,9 +485,10 @@ const SUB={
  house:[["clean","청소","broom"],["laundry","빨래","towel"],["fold","수건 개기","towel"],["ironing","다림질","iron"],["toys","장난감 정리","block"]],
  study:[["read","독서","book"],["study","공부","pen"],["laptop","노트북","laptop"],["diary","일기 쓰기","laptop"]],
  play:[["bike","자전거","bike"],["weight","역기","dumb"],["dance","춤","note"],["guitar","기타","guitar"],["phone","폰","phone"],["zone","멍때리기","q"]],
- family:[["dog","강아지 공","ball"],["dogfood","강아지 밥","kibble"],["bear","곰인형","bear"]]
+ family:[["dog","강아지 공","ball"],["dogfood","강아지 밥","kibble"],["bear","곰인형","bear"]],
+ rest:[["sleep","잠자기","SLEEP"],["zone","멍때리기","q"],["water","물","cup"],["meal","밥","rice"]]
 };
-const SUBICO=k=>{if(k==="wash")return ICO.wash;if(k==="pack")return `<ellipse cx="0" cy="0" rx="11" ry="13" fill="#fbfdff" ${S2}/><ellipse cx="-4" cy="-3" rx="2.6" ry="2.2" fill="#dfe9f4"/><ellipse cx="4" cy="-3" rx="2.6" ry="2.2" fill="#dfe9f4"/>`;
+const SUBICO=k=>{if(k==="SLEEP")return ICO.sleep;if(k==="wash")return ICO.wash;if(k==="pack")return `<ellipse cx="0" cy="0" rx="11" ry="13" fill="#fbfdff" ${S2}/><ellipse cx="-4" cy="-3" rx="2.6" ry="2.2" fill="#dfe9f4"/><ellipse cx="4" cy="-3" rx="2.6" ry="2.2" fill="#dfe9f4"/>`;
  if(k==="closet")return `<rect x="-12" y="-14" width="24" height="28" rx="3" fill="#ffd3e2" ${S2}/><path d="M0 -14 L0 14" ${S2}/><circle cx="-3" cy="0" r="1.4" fill="${OL}"/><circle cx="3" cy="0" r="1.4" fill="${OL}"/>`;
  if(k==="laptop")return `<rect x="-11" y="-11" width="22" height="15" rx="2" fill="#c9b6ff" ${S2}/><path d="M-15 6 L15 6 L12 10 L-12 10Z" fill="#a497bd" ${S2}/>`;
  if(k==="bike")return `<g transform="scale(.6)"><circle cx="-14" cy="8" r="9" fill="none" stroke="${OL}" stroke-width="3"/><circle cx="14" cy="8" r="9" fill="none" stroke="${OL}" stroke-width="3"/><path d="M-14 8 L0 -10 L14 8" fill="none" stroke="#ff9fbf" stroke-width="4"/></g>`;
@@ -498,7 +501,7 @@ function drawMenu(){const m=$("menu"),pd=pending();
   if(!cat){m.innerHTML=`<div class="grid">${CATS.map(([k,n])=>`<button class="a" data-cat="${k}" ${busy?"disabled":""}>${pd[k]?'<i class="dot"></i>':""}<svg viewBox="-18 -18 36 36" aria-hidden="true">${ICO[k]}</svg><span>${n}</span></button>`).join("")}
      <button class="a" data-cat="sleep" ${busy?"disabled":""}><svg viewBox="-18 -18 36 36" aria-hidden="true">${ICO.sleep}</svg><span>잠자기</span></button><button class="a" data-cat="door" ${busy?"disabled":""}><svg viewBox="-18 -18 36 36" aria-hidden="true">${ICO.door}</svg><span>${S.out?"들어오기":"문"}</span></button></div>`;
    m.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.cat;if(k==="sleep")return runAct("sleep");if(k==="door")return doorTap();if(S.out)return toast("먼저 방에 들어와요");cat=k;SFX.pop();drawMenu()}));return}
-  const name=CATS.find(c=>c[0]===cat)[1];
+  const name=(CATS.find(c=>c[0]===cat)||[0,"체력 충전"])[1];
   m.innerHTML=`<div class="mhead"><button class="back" id="back">← 뒤로</button><span>${name}</span></div><div class="grid">${SUB[cat].map(([k,n,ic])=>`<button class="a" data-act="${k}" ${busy?"disabled":""}><svg viewBox="-18 -18 36 36" aria-hidden="true">${SUBICO(ic)}</svg><span>${n}</span></button>`).join("")}</div>`;
   $("back").addEventListener("click",()=>{cat=null;drawMenu()});
   m.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click",()=>runAct(b.dataset.act)))}
