@@ -467,7 +467,7 @@ try{fetch(URL_EV+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.
 </script>
 
 <script>
-(function(){const VOL=35;const f=document.getElementById("mvf");if(!f)return;
+(function(){const VOL=25;const f=document.getElementById("mvf");if(!f)return;
  const cmd=(fn,args)=>{try{f.contentWindow.postMessage(JSON.stringify({event:"command",func:fn,args:args||[]}),"*")}catch(e){}};
  const hello=()=>{try{f.contentWindow.postMessage(JSON.stringify({event:"listening",id:"mvf",channel:"widget"}),"*")}catch(e){}cmd("setVolume",[VOL])};
  f.addEventListener("load",()=>{let n=0;const t=setInterval(()=>{hello();if(++n>8)clearInterval(t)},500)});
