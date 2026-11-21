@@ -652,14 +652,14 @@ function openCloset(){lock(false);const m=document.createElement("div");m.classN
    m.querySelectorAll("[data-lock]").forEach(b=>b.addEventListener("click",()=>toast("아직 없는 옷이에요 · 친구 선물·택배·칭찬 도장·강경 대모험에서 얻어요")));m.querySelectorAll("[data-id]").forEach(b=>b.addEventListener("click",()=>{const it=ITEMS.find(i=>i.id===b.dataset.id);S.equip[W()]=S.equip[W()]||{};S.equip[W()][it.slot]=S.equip[W()][it.slot]===it.id?undefined:it.id;save();SFX.pop();draw()}))};
   document.body.appendChild(m);draw()}
 // ================= door, parcel, friends
-async function doorTap(){if(window.__openKnock){window.__openKnock();return}if(busy)return;lock(true);SFX.pop();
+async function doorTap(){if(window.__openKnock){window.__openKnock();return}{const pc=document.querySelector(".parcel");if(pc&&!S.out){ono("철컥",innerWidth*.15,$("room").getBoundingClientRect().top+120,"brown");SFX.pop();pc.click();return}}if(busy)return;lock(true);SFX.pop();
   if(!S.out){setPose({prop:null,cls:"",at:"door"});await wait(850);ono("철컥",innerWidth*.15,$("room").getBoundingClientRect().top+120,"brown");S.out=true;save();drawRoom();drawChar();toast(iga(NM[W()])+" 밖에 나갔어요 · 문을 눌러 들어오게 해요");lock(false);drawMenu()}
   else{S.out=false;save();ono("철컥",innerWidth*.15,$("room").getBoundingClientRect().top+120,"brown");setPose({prop:null,cls:"",at:"door"});drawRoom();await wait(300);setPose({at:"center"});await wait(800);advance(120);say("다녀왔다~","gold");S.hb.hands=false;S.ao={cloth:false,hands:false,wash:false,laundry:false};S.laundry=true;save();drawRoom();drawTodo();setTimeout(()=>toast("외출 후 할 일 · 옷 갈아입기 · 손 씻기 · 씻기 · 빨래 (다 해야 잘 수 있어요)"),900);add({mood:8,hp:-8});lock(false)}}
 function event(){if(S.out)return;const r=Math.random();if(r<.16)parcel();else if(r<.28)friend()}
 function parcel(){if(document.querySelector(".parcel"))return;SFX.dong();ono("띵동~",innerWidth*.18,$("room").getBoundingClientRect().top+110,"gold");
   const b=document.createElement("button");b.className="parcel";b.setAttribute("aria-label","택배 상자");b.innerHTML=`<svg viewBox="-20 -20 40 40"><rect x="-15" y="-10" width="30" height="24" rx="2" fill="#e9c39b" stroke="${OL}" stroke-width="1.8"/><path d="M-15 -10 L0 -16 L15 -10" fill="#f3d1b4" stroke="${OL}" stroke-width="1.8"/><rect x="-3" y="-10" width="6" height="24" fill="#ffd27a"/></svg>`;
   b.addEventListener("click",()=>{b.remove();giveItem("택배")});
-  $("room").appendChild(b);toast("택배가 왔어요! 문 앞 상자를 눌러 열어요")}
+  $("room").appendChild(b);toast("띵동~ 택배 왔어요! 문이나 상자를 눌러 받아요")}
 async function friend(){if(document.querySelector(".friend")||window.__openKnock)return;const k=pick(["o","g","m"].filter(x=>x!==W()));const fn=NM[k];
   const rt=()=>$("room").getBoundingClientRect();
   const knockFx=()=>{SFX.knock();ono("똑똑똑",innerWidth*.2,rt().top+rt().height*.45,"brown");const d=document.getElementById("doorLeaf");if(d&&d.animate){d.style.transformBox="fill-box";d.style.transformOrigin="0% 50%";d.animate([{transform:"rotate(0)"},{transform:"rotate(-1.5deg)"},{transform:"rotate(1.5deg)"},{transform:"rotate(0)"}],{duration:320})}};
