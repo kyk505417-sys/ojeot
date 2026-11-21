@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><script>(function(){var B=window.AudioContext||window.webkitAudioContext;if(!B)return;var P=(window.BaseAudioContext||B).prototype,D=Object.getOwnPropertyDescriptor(P,"destination");if(!D||!D.get)return;
-class A extends B{get destination(){if(!this.__m){var d=D.get.call(this),c=this.createDynamicsCompressor();c.threshold.value=-6;c.knee.value=6;c.ratio.value=6;this.__m=this.createGain();this.__m.gain.value=2.2;this.__m.connect(c);c.connect(d)}return this.__m}}
+class A extends B{get destination(){if(!this.__m){var d=D.get.call(this),c=this.createDynamicsCompressor();c.threshold.value=-10;c.knee.value=4;c.ratio.value=12;c.attack.value=.002;c.release.value=.1;this.__m=this.createGain();this.__m.gain.value=4.5;this.__m.connect(c);c.connect(d)}return this.__m}}
 window.AudioContext=A;window.webkitAudioContext=A})();</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CYZP4V19JV"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-CYZP4V19JV");</script><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
