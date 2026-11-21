@@ -57,7 +57,8 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 .addrow{display:flex;gap:6px;margin-top:10px}
 .addrow input{flex:1;min-width:0;border:2px solid var(--line);border-radius:12px;padding:9px 12px;font-size:16px;background:#fff;outline:none}
 .addrow input:focus{border-color:var(--pink)}
-.legend{font-size:12px;color:var(--muted);margin:6px 2px 0;line-height:1.5}
+.legend{font-size:12px;color:var(--muted);margin:6px 2px 0;line-height:1.9}
+.legend .li svg{width:18px;height:18px;vertical-align:-4px;margin-right:2px}
 /* links */
 .links{display:grid;grid-template-columns:1fr;gap:10px}
 .lk{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 3px 0 var(--line);text-decoration:none;color:inherit}
@@ -171,7 +172,7 @@ button.lk{width:100%;border:0;text-align:left;font:inherit;color:inherit}
   <section id="pEdit" hidden>
     <div class="sec">내 메뉴 편집</div>
     <div class="etabs" id="etabs"></div>
-    <p class="legend">하트 = 좋아하는 음식(돌림판 칸이 두 배) · 엑스 = 싫어하는 음식(돌림판에서 빠져요) · 휴지통 = 메뉴 지우기(목록에서 완전히 사라져요, 되돌리기 버튼으로 복구). 편집한 내용은 이 폰에 저장돼요.</p>
+    <p class="legend" id="legend"></p>
     <ul class="items" id="items"></ul>
     <form class="addrow" id="addForm"><input id="addIn" maxlength="14" placeholder="먹고 싶은 메뉴 넣기" aria-label="새 메뉴 이름"><button class="btn sm" type="submit">넣기</button></form>
     <div class="go"><button class="btn sm ghost" id="resetCat">이 종류 처음 메뉴로 되돌리기</button></div>
@@ -209,6 +210,7 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 const OL="#4a3428";
 const WALK="https://kyk505417-sys.github.io/ganggyeong/";
 const ROOM="https://kyk505417-sys.github.io/ojeot/room/";
+const KIMJANG="https://kyk505417-sys.github.io/ojeot/kimjang/";
 const map=q=>"https://map.naver.com/p/search/"+encodeURIComponent(q);
 // ===== base menus
 const CATS=[
@@ -216,7 +218,7 @@ const CATS=[
  ["gg","강경 젓갈"],
  ["kor","한식"],["snack","분식"],["chn","중식"],["jpn","일식"],["west","양식"],["burger","햄버거"],["chicken","치킨"],["pizza","피자"],["dessert","디저트"]];
 const BASE={
- gg:["젓갈 정식","젓갈 비빔밥","강경바다젓갈","강경 쭈꾸미","함열상회","태평식당","우어회","강경 칼국수","강경돈가스"],
+ gg:["젓갈 정식","김가네 대가추어탕","바다젓갈","강경 쭈꾸미","함열상회","태평식당","우어회","강경 칼국수","강경돈가스"],
  kor:["김치찌개","된장찌개","제육볶음","비빔밥","불고기","순두부찌개","갈비탕","삼겹살","냉면","칼국수"],
  snack:["떡볶이","순대","김밥","라면","튀김","쫄면","라볶이","어묵"],
  chn:["짜장면","짬뽕","탕수육","볶음밥","마라탕","마파두부","깐풍기"],
@@ -240,6 +242,7 @@ function pool(c){const cats=c==="all"?Object.keys(BASE):[c];const out=[];cats.fo
 let AC=null;function ac(){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}catch(e){return null}}
 function tone(f,t0,d,v,type){const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(t0||0);o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v||.06,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.02)}
 const tick=()=>tone(1500,0,.04,.05);
+const bbok=()=>{const c=ac();if(!c)return;[[0,420,1100],[.09,560,1500]].forEach(([d,f1,f2])=>{const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+d;o.type="sine";o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+.06);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.09,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.08);o.connect(g).connect(c.destination);o.start(t);o.stop(t+.1)})};
 const fanfare=()=>[1047,1319,1568,2093].forEach((f,i)=>{tone(f,i*.09,.5,.05);tone(f*2,i*.09,.3,.012)});
 // ===== fx
 function ono(t,x,y,stroke){const d=document.createElement("div");d.className="ono";d.textContent=t;if(stroke)d.style.webkitTextStrokeColor=stroke;d.style.left=x+"px";d.style.top=y+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1050)}
@@ -249,7 +252,7 @@ function toast(t){document.querySelectorAll(".toast").forEach(e=>e.remove());con
 const TIPS=[
  "강경은 옛날 <b>조선 3대 시장</b> 중 하나로 불릴 만큼 북적이던 곳이에요.",
  "<b>옥녀봉</b>에 오르면 금강과 강경 시내가 한눈에 보여요. 노을 맛집!",
- "가을이 되면 <b>강경젓갈축제</b>가 열려요. 젓갈 시장 구경은 언제든 가능해요.",
+ "가을이 되면 <b>강경젓갈축제</b>가 열려요.<br>시장 구경은 언제든 가능해요.",
  "강경 <b>근대역사문화거리</b>에는 옛 은행·약방 같은 근대 건물이 남아 있어요.",
  "젓갈은 짭짤하니까 <b>흰 쌀밥</b>이랑 먹으면 최고예요. 오늘은 밥 한 공기 더?",
  "오젓군은 오징어젓, 꼴뚜링은 꼴뚜기젓, 명란아씨는 명란젓에서 왔어요.",
@@ -291,7 +294,7 @@ function drawWheel(){let p=pool(S.cat);
  p.forEach((x,i)=>{const ang=x.w/tot*360,a1=a0+ang,r=94,rad=d=>d*Math.PI/180;x.a0=a0;x.a1=a1;
   const large=ang>180?1:0,P=d=>`${(r*Math.cos(rad(d))).toFixed(2)} ${(r*Math.sin(rad(d))).toFixed(2)}`;
   h+=p.length===1?`<circle r="${r}" fill="${PAL[0]}"/>`:`<path d="M0 0 L${P(a0)} A${r} ${r} 0 ${large} 1 ${P(a1)}Z" fill="${x.c==="gg"?"#ffe7a8":PAL[i%PAL.length]}" stroke="#fff" stroke-width="1.5"/>`;
-  const mid=(a0+a1)/2,fl=mid>90&&mid<270;h+=`<g transform="rotate(${fl?mid+180:mid})"><text x="${fl?-88:88}" y="${fs*.36}" text-anchor="${fl?"start":"end"}" font-size="${fs}" fill="${OL}" font-family="Jua,sans-serif">${x.n}${x.w>1?" ♥":""}</text></g>`;a0=a1});
+  const mid=(a0+a1)/2,fl=mid>90&&mid<270;h+=`<g transform="rotate(${fl?mid+180:mid})"><text x="${fl?-88:88}" y="${fs*.36}" text-anchor="${fl?"start":"end"}" font-size="${fs}" fill="${OL}" font-family="Jua,sans-serif">${(()=>{const t=x.n+(x.w>1?" ♥":"");const sp=x.n.indexOf(" ");if(x.n.replace(/ /g,"").length>6&&sp>0){const L=[t.slice(0,sp),t.slice(sp+1)];return L.map((l,k)=>`<tspan x="${fl?-88:88}" dy="${k?fs*1.05:-fs*.52}">${l}</tspan>`).join("")}return t})()}</text></g>`;a0=a1});
  h+=`<circle r="96" fill="none" stroke="#e3d6f5" stroke-width="4"/>`;
  for(let i=0;i<24;i++){const d=i*15*Math.PI/180;h+=`<circle cx="${(97*Math.cos(d)).toFixed(1)}" cy="${(97*Math.sin(d)).toFixed(1)}" r="1.8" fill="${i%2?"#ffb3c7":"#fff"}"/>`}
  W.innerHTML=h;$("wnote").textContent=`${CNAME[S.cat]} · ${p.length}가지 메뉴${S.fav.length?" · 하트 메뉴는 칸이 두 배":""}`}
@@ -321,10 +324,11 @@ $("spin").addEventListener("click",spin);$("hub").addEventListener("click",spin)
 // ===== edit
 let ecat="gg";
 const ICON={heart:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8 C-1.6 -8 0 -6 0 -4.4 C0 -6 1.6 -8 4 -8 C9 -8 11 1 0 8Z" fill="#ff8fab" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
- heartOff:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8 C-1.6 -8 0 -6 0 -4.4 C0 -6 1.6 -8 4 -8 C9 -8 11 1 0 8Z" fill="#fff" stroke="#c9b6ea" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
- x:`<svg viewBox="-12 -12 24 24"><path d="M-6 -6 L6 6 M6 -6 L-6 6" stroke="#a497bd" stroke-width="3" stroke-linecap="round"/></svg>`,
- trash:`<svg viewBox="-12 -12 24 24"><path d="M-7 -5 H7 M-3 -5 V-8 H3 V-5 M-5.5 -5 L-4.5 8 H4.5 L5.5 -5" fill="none" stroke="#a497bd" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`};
-function drawEdit(){$("etabs").innerHTML=CATS.filter(c=>c[0]!=="all").map(([k,n])=>`<button class="chip" aria-pressed="${ecat===k}" data-k="${k}">${n}</button>`).join("");
+ heartOff:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8 C-1.6 -8 0 -6 0 -4.4 C0 -6 1.6 -8 4 -8 C9 -8 11 1 0 8Z" fill="#fff0f5" stroke="#ff9fbf" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+ x:`<svg viewBox="-12 -12 24 24"><circle r="9.5" fill="#cfe4ff" stroke="${OL}" stroke-width="1.6"/><path d="M-4 -4 L4 4 M4 -4 L-4 4" stroke="#5b8fd9" stroke-width="2.8" stroke-linecap="round"/></svg>`,
+ trash:`<svg viewBox="-12 -12 24 24"><path d="M-6 -4 L-5 9 H5 L6 -4Z" fill="#c9f0d8" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/><rect x="-8" y="-7" width="16" height="3.4" rx="1.4" fill="#9fe0b9" stroke="${OL}" stroke-width="1.5"/><path d="M-2.5 -7 V-9.5 H2.5 V-7" fill="none" stroke="${OL}" stroke-width="1.5"/><path d="M-2 -1 V6 M2 -1 V6" stroke="#5cb88a" stroke-width="1.5" stroke-linecap="round"/></svg>`};
+function drawLegend(){const e=$("legend");if(!e||e.dataset.ok)return;e.dataset.ok=1;const I=k=>`<span class="li">${ICON[k]}</span>`;e.innerHTML=`${I("heart")} 좋아하는 음식 (돌림판 칸이 두 배)<br>${I("x")} 싫어하는 음식 (돌림판에서 빠져요)<br>${I("trash")} 메뉴 지우기 (되돌리기 버튼으로 복구)<br>편집한 내용은 이 폰에 저장돼요.`}
+function drawEdit(){drawLegend();$("etabs").innerHTML=CATS.filter(c=>c[0]!=="all").map(([k,n])=>`<button class="chip" aria-pressed="${ecat===k}" data-k="${k}">${n}</button>`).join("");
  $("etabs").querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{ecat=b.dataset.k;drawEdit()}));
  const mine=S.add[ecat]||[];
  $("items").innerHTML=menusOf(ecat).map(n=>{const f=S.fav.includes(n),x=S.ban.includes(n),own=mine.includes(n);return `<li class="${x?"ban":""}"><span>${n}</span>
@@ -342,10 +346,12 @@ $("resetCat").addEventListener("click",()=>{const all=[...(BASE[ecat]||[]),...me
 // ===== games + trip
 const GICON={
  walk:`<svg viewBox="0 0 64 64"><path d="M8 14 L22 9 L42 15 L56 10 V50 L42 55 L22 49 L8 54Z" fill="#fff1cf" stroke="${OL}" stroke-width="2.4" stroke-linejoin="round"/><path d="M22 9 V49 M42 15 V55" stroke="#e8cf9a" stroke-width="1.6"/><path d="M14 45 C20 40 18 32 27 31 C36 30 33 22 44 21" fill="none" stroke="#e2604f" stroke-width="2.6" stroke-dasharray="1 4.5" stroke-linecap="round"/><circle cx="14" cy="45" r="3.2" fill="#7fd1a8" stroke="${OL}" stroke-width="1.8"/><path d="M46 23 V9" stroke="${OL}" stroke-width="2.2" stroke-linecap="round"/><path d="M46 9 L56 12.5 L46 16Z" fill="#ff8fab" stroke="${OL}" stroke-width="1.8" stroke-linejoin="round"/><circle cx="35" cy="42" r="6" fill="none" stroke="#a98bd8" stroke-width="2.2"/><path d="M32.5 42 L34.5 44 L38 40" fill="none" stroke="#a98bd8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ kimjang:`<svg viewBox="0 0 64 64"><path d="M16 20 H48 C56 28 56 50 48 58 H16 C8 50 8 28 16 20Z" fill="#c98e5f" stroke="${OL}" stroke-width="2.4"/><path d="M14 14 H50 V22 H14Z" fill="#8a5c3a" stroke="${OL}" stroke-width="2.2"/><path d="M20 32 C28 28 36 28 44 32 C46 40 46 46 44 52 C36 55 28 55 20 52 C18 46 18 40 20 32Z" fill="#e8513f" stroke="${OL}" stroke-width="1.8"/><path d="M26 10 C24 4 32 2 32 10 M34 10 C36 2 44 4 40 12" fill="#8fd16a" stroke="${OL}" stroke-width="1.8"/><circle cx="28" cy="40" r="1.8" fill="#fff9"/><circle cx="37" cy="45" r="1.8" fill="#fff9"/></svg>`,
  room:`<svg viewBox="0 0 64 64"><rect x="7" y="8" width="50" height="48" rx="8" fill="#ffe7f0" stroke="${OL}" stroke-width="2.4"/><path d="M7 44 H57" stroke="${OL}" stroke-width="2"/><rect x="15" y="15" width="16" height="14" rx="2.5" fill="#c4e7ff" stroke="${OL}" stroke-width="2"/><path d="M23 15 V29 M15 22 H31" stroke="${OL}" stroke-width="1.6"/><path d="M47 14 V22" stroke="${OL}" stroke-width="1.8"/><path d="M41 22 H53 L50.5 29 H43.5Z" fill="#ffe29a" stroke="${OL}" stroke-width="1.8" stroke-linejoin="round"/><rect x="12" y="36" width="30" height="10" rx="3" fill="#fff" stroke="${OL}" stroke-width="2"/><rect x="24" y="35" width="18" height="11" rx="3" fill="#a98bd8" stroke="${OL}" stroke-width="2"/><rect x="13.5" y="33" width="9" height="5" rx="2.5" fill="#fff" stroke="${OL}" stroke-width="1.8"/><path d="M12 46 V50 M42 46 V50" stroke="${OL}" stroke-width="2.2" stroke-linecap="round"/><path d="M50 36 C47 33 45.5 37 50 40 C54.5 37 53 33 50 36Z" fill="#ff8fab" stroke="${OL}" stroke-width="1.5"/></svg>`};
 function drawGames(){$("games").innerHTML=[
  ["짭짤한 녀석들의 대모험","친구를 골라 강경 골목 걷고 도장 모으기",WALK,"walk"],
- ["짭짤한 녀석들의 방","친구를 골라 하루 보내고 칭찬 도장 받기",ROOM,"room"]
+ ["짭짤한 녀석들의 방","친구를 골라 하루 보내고 칭찬 도장 받기",ROOM,"room"],
+ ["콕콕 김장 놀이","강경 젓갈 넣고 김장해요!",KIMJANG,"kimjang"]
 ].map(([t,s,u,g])=>`<a class="lk" href="${u}" target="_blank" rel="noopener"><span class="gic">${GICON[g]}</span><div><b>${t}</b><small>${s}</small></div><span class="arr">›</span></a>`).join("")}
 const HELLO={o:"이고고~ 안녕!<br>나는 강경에 사는 <b>오젓군</b>이야.<br>길치라서 강경에서 쭉 나고 자랐어.<br>노을 보는 게 제일 좋아!",
  g:"워~워~ 안녕!<br>나는 <b>꼴뚜링</b>이야.<br>유학 갔다가 다시 강경으로<br>돌아온 패션리더야.<br>링과 이어폰은 내 트레이드마크!<br>히말라야 소금 아메리카노를 즐겨 마셔.",
@@ -390,10 +396,11 @@ const TRIP=[
   famous:["팔괘정 뒤 바위에,<br>송시열이 새긴 글씨가 있어요."],
   point:["정자에 앉아 금강 바라보기","바위 글씨 찾아보기"]}
 ];
-function drawTrip(){$("trip").innerHTML=TRIP.map((p,i)=>`<button class="lk" data-i="${i}"><span class="ic">${PIN(p.c)}</span><div><b>${p.t}</b><small>${p.s}</small><span class="say"><img src="${IMG[C]}" alt="">${CH[C].ono[(i+day)%CH[C].ono.length]}</span></div><span class="arr">›</span></button>`).join("");
+const PW=[["옥녀봉","힐링~"],["젓갈시장","냠냠"],["근대","우앙~"],["전시관","츄릅~"],["미내다리","찰칵찰칵"],["팔괘정","고즈넉♡"]];const pw=(p,f)=>{const h=PW.find(x=>p.t.includes(x[0]));return h?h[1]:f};
+function drawTrip(){$("trip").innerHTML=TRIP.map((p,i)=>`<button class="lk" data-i="${i}"><span class="ic">${PIN(p.c)}</span><div><b>${p.t}</b><small>${p.s}</small><span class="say"><img src="${IMG[C]}" alt="">${pw(p,CH[C].ono[(i+day)%CH[C].ono.length])}</span></div><span class="arr">›</span></button>`).join("");
  $("trip").querySelectorAll("[data-i]").forEach(b=>b.addEventListener("click",()=>openPlace(TRIP[+b.dataset.i])))}
 function openPlace(p){tick();const m=document.createElement("div");m.className="modal sheetm";const li=a=>`<ul>${a.map(x=>`<li>${x}</li>`).join("")}</ul>`;
- m.innerHTML=`<div class="place" role="dialog" aria-label="${p.t}"><div class="ph"><span class="ic">${PIN(p.c)}</span><div><h3>${p.t}</h3><span class="say"><img src="${IMG[C]}" alt="">${pick(CH[C].ono)}</span></div><button class="x" aria-label="닫기">✕</button></div>
+ m.innerHTML=`<div class="place" role="dialog" aria-label="${p.t}"><div class="ph"><span class="ic">${PIN(p.c)}</span><div><h3>${p.t}</h3><span class="say"><img src="${IMG[C]}" alt="">${pw(p,pick(CH[C].ono))}</span></div><button class="x" aria-label="닫기">✕</button></div>
   <p class="intro">${p.intro}</p><h4>이야기 · 전설</h4>${li(p.story)}<h4>유명한 점</h4>${li(p.famous)}<h4>관전 포인트</h4>${li(p.point)}
   <div class="pbtn"><a class="btn mint" href="${map(p.q)}" target="_blank" rel="noopener">네이버 지도로 길찾기</a></div></div>`;
  document.body.appendChild(m);m.addEventListener("click",e=>{if(e.target===m||e.target.closest(".x"))m.remove()})}
@@ -404,7 +411,7 @@ const TABS=[["pEat","뭐 먹지",`<svg viewBox="-14 -14 28 28"><path d="M-11 -1 
  ["pTrip","강경 여행",PIN("#c4e7ff")]];
 let tab="pEat";
 function drawTabs(){$("tabbar").innerHTML=TABS.map(([id,n,ic])=>`<button role="tab" aria-selected="${tab===id}" data-t="${id}">${ic}<span>${n}</span></button>`).join("");
- $("tabbar").querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;TABS.forEach(([id])=>$(id).hidden=id!==tab);if(tab==="pEdit")drawEdit();if(tab==="pEat")drawWheel();drawTabs();scrollTo(0,0)}))}
+ $("tabbar").querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{try{bbok()}catch(e){}tab=b.dataset.t;TABS.forEach(([id])=>$(id).hidden=id!==tab);if(tab==="pEdit")drawEdit();if(tab==="pEat")drawWheel();drawTabs();scrollTo(0,0)}))}
 // ===== 제휴 쿠폰 (partners.json, 쿠폰 받을 때마다 번호 자동 생성)
 const PARTNER_URL="https://kyk505417-sys.github.io/ojeot/partners.json";
 let PARTNERS=[];
