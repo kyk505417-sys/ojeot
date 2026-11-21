@@ -184,7 +184,7 @@ button.lk{width:100%;border:0;text-align:left;font:inherit;color:inherit}
     <div class="sec">게임</div>
     <div class="links" id="games"></div>
     <div class="sec">뮤직비디오</div>
-    <div class="mv"><iframe src="https://www.youtube-nocookie.com/embed/Mn-b-pKzQjc?rel=0&playsinline=1&loop=1&playlist=Mn-b-pKzQjc" title="짭짤한 녀석들 뮤직비디오" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    <div class="mv"><iframe id="mvf" src="https://www.youtube-nocookie.com/embed/Mn-b-pKzQjc?rel=0&playsinline=1&loop=1&playlist=Mn-b-pKzQjc&enablejsapi=1" title="짭짤한 녀석들 뮤직비디오" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
     <p class="note"><a href="https://youtu.be/Mn-b-pKzQjc" target="_blank" rel="noopener" style="color:var(--pink-d)">유튜브에서 보기 · 구독도 꾹!</a></p>
     <div class="sec">짭짤한 녀석들 채널</div>
     <div class="links" id="brand"></div>
@@ -463,5 +463,16 @@ function show(list){if(!Array.isArray(list)||!list.length)return;var t=new Date(
  el.querySelector(".x").addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();hid[x.key]=t.toDateString();try{localStorage.setItem("ojeot-ev-hide",JSON.stringify(hid))}catch(_){}el.remove()});
  app.insertBefore(el,app.firstChild)}
 try{fetch(URL_EV+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(show).catch(function(){})}catch(e){}
+})();
+</script>
+
+<script>
+(function(){const VOL=35;const f=document.getElementById("mvf");if(!f)return;
+ const cmd=(fn,args)=>{try{f.contentWindow.postMessage(JSON.stringify({event:"command",func:fn,args:args||[]}),"*")}catch(e){}};
+ const hello=()=>{try{f.contentWindow.postMessage(JSON.stringify({event:"listening",id:"mvf",channel:"widget"}),"*")}catch(e){}cmd("setVolume",[VOL])};
+ f.addEventListener("load",()=>{let n=0;const t=setInterval(()=>{hello();if(++n>8)clearInterval(t)},500)});
+ window.addEventListener("message",e=>{if(!/youtube/.test(e.origin||""))return;let d;try{d=typeof e.data==="string"?JSON.parse(e.data):e.data}catch(x){return}
+  if(!d)return;if(d.event==="onReady")cmd("setVolume",[VOL]);
+  if(d.event==="infoDelivery"&&d.info&&d.info.playerState===1&&!f._set){f._set=1;cmd("setVolume",[VOL])}});
 })();
 </script>
