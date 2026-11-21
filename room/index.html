@@ -165,6 +165,8 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 .wditem.lock span{color:var(--muted)}
 .gift{position:absolute;width:10%;left:10%;bottom:6%;z-index:4;border:0;background:none;padding:0;animation:bob .5s ease-in-out infinite alternate}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#hotDoor{z-index:30!important}
+body.out #char{pointer-events:none}
 </style>
 
 <div class="app">
@@ -348,7 +350,7 @@ function charInner(){const eq=S.equip[W()]||{};let out=`<image href="${IMG[W()]}
   const hand=pose.prop?(PROP[pose.prop]||(ITEMS.find(i=>i.id===pose.prop)||{}).art):(eq.hand?(ITEMS.find(i=>i.id===eq.hand)||{}).art:null);
   if(hand){const big=pose.prop==="guitar"||pose.prop==="bear";const a=big?[50,112,1.25]:ANCH[W()].hand;out+=`<g transform="translate(${a[0]},${a[1]}) scale(${a[2]})">${hand}</g>`}
   return out}
-function drawChar(){const c=$("char");c.className="char "+(pose.cls||"");c.innerHTML=`<svg viewBox="-10 -40 120 190" aria-label="${NM[W()]}">${charInner()}</svg>${S.hb&&S.hb.germ?GERM:""}`;const [x,y]=SPOT[pose.at]||SPOT.center;c.style.left=(x/360*100)+"%";c.style.bottom=((320-y)/320*100)+"%";c.style.opacity=S.out?0:1}
+function drawChar(){document.body.classList.toggle("out",!!S.out);const c=$("char");c.className="char "+(pose.cls||"");c.innerHTML=`<svg viewBox="-10 -40 120 190" aria-label="${NM[W()]}">${charInner()}</svg>${S.hb&&S.hb.germ?GERM:""}`;const [x,y]=SPOT[pose.at]||SPOT.center;c.style.left=(x/360*100)+"%";c.style.bottom=((320-y)/320*100)+"%";c.style.opacity=S.out?0:1}
 function setPose(p){pose=Object.assign({prop:null,mask:false,cls:"",at:pose.at},p);drawRoom()}
 const idle=()=>setPose({prop:null,mask:false,cls:"",at:"center"});
 // ================= room scene
