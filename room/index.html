@@ -171,6 +171,8 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 #hotDoor{z-index:30!important}
 body.out #char{pointer-events:none}
 .must{margin-top:10px;background:#fff4f8;border:2px dashed #ffc6d6;border-radius:14px;padding:8px 10px}.must b{display:block;font-weight:400;color:#e3527a;font-size:14px;margin-bottom:6px}.must div{display:flex;flex-wrap:wrap;gap:6px}.must button{border:0;border-radius:99px;padding:6px 12px;background:#fff;color:#6a4a5e;font-family:inherit;font-size:14px;box-shadow:0 2px 0 #ffd6e2}.must button:active{transform:scale(.95)}.must button.ok{background:#e3f7ea;color:#3aa874;box-shadow:none;text-decoration:line-through;text-decoration-color:#3aa87488}
+.toybox{position:absolute;left:61.5%;bottom:3%;width:12.5%;z-index:4;pointer-events:none}.toybox svg{display:block;width:100%;height:auto;filter:drop-shadow(0 3px 2px rgba(120,90,160,.25))}.toybox b{position:absolute;right:-6%;top:-14%;min-width:18px;height:18px;border-radius:9px;background:#ff6f91;color:#fff;font-weight:400;font-size:11px;display:none;place-items:center;padding:0 4px}.toybox.has b{display:grid}.toybox.pop{animation:tbp .35s}@keyframes tbp{50%{transform:scale(1.18) rotate(-4deg)}}
+.char{pointer-events:auto}.char .eqi{cursor:pointer;pointer-events:all}
 </style>
 
 <div class="app">
@@ -179,7 +181,7 @@ body.out #char{pointer-events:none}
     <svg class="bg" id="bg" viewBox="0 0 360 320" aria-label="오젓군의 방"></svg>
     <div class="wx" id="wx"></div>
     <div class="dim" id="dim"></div>
-    <div class="dog" id="dog"></div>
+    <div class="toybox" id="toybox" aria-label="장난감 통"><svg viewBox="0 0 60 46"><path d="M6 14 H54 L50 44 H10Z" fill="#ffd6a5" stroke="#5d4b7a" stroke-width="2.4" stroke-linejoin="round"/><path d="M3 8 H57 V16 H3Z" fill="#ff9fbf" stroke="#5d4b7a" stroke-width="2.4" stroke-linejoin="round"/><circle cx="14" cy="10" r="6" fill="#9fd8ff" stroke="#5d4b7a" stroke-width="2"/><rect x="40" y="2" width="9" height="9" rx="2" fill="#ffe066" stroke="#5d4b7a" stroke-width="2"/><text x="30" y="35" text-anchor="middle" font-size="13" font-family="Jua,sans-serif" fill="#5d4b7a" letter-spacing="1">TOY</text></svg><b id="toyN"></b></div><div class="dog" id="dog"></div>
     <div class="char" id="char"></div>
     <div class="panel" id="panel" hidden></div>
   </div>
@@ -357,12 +359,15 @@ function pickWho(first){const m=document.createElement("div");m.className="modal
  document.body.appendChild(m);if(!first)$("whox").addEventListener("click",()=>m.remove());
  m.querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{S.who=b.dataset.k;S.equip[S.who]=S.equip[S.who]||{};save();m.remove();drawAll();SFX.done();setTimeout(()=>say({o:"야르!",g:"후후…",m:"이고고고!"}[S.who],"gold"),300)}))}
 function charInner(){const eq=S.equip[W()]||{};let out=`<image href="${IMG[W()]}" x="0" y="0" width="100" height="150" preserveAspectRatio="xMidYMid meet"/>`;
-  ["neck","eyes","head"].forEach(slot=>{const id=eq[slot];if(!id)return;const it=ITEMS.find(i=>i.id===id);if(!it)return;const a=ANCH[W()][it.anchor||slot];out+=`<g transform="translate(${a[0]},${a[1]}) scale(${a[2]})">${it.art}</g>`});
+  ["neck","eyes","head"].forEach(slot=>{const id=eq[slot];if(!id)return;const it=ITEMS.find(i=>i.id===id);if(!it)return;const a=ANCH[W()][it.anchor||slot];out+=`<g class="eqi" data-slot="${slot}" transform="translate(${a[0]},${a[1]}) scale(${a[2]})"><rect x="-22" y="-22" width="44" height="44" fill="transparent"/>${it.art}</g>`});
   if(pose.mask)out+=`<g transform="translate(${MASKOFF[W()][0]},${MASKOFF[W()][1]})"><path fill-rule="evenodd" d="M50 52 C70 52 74 64 74 71 C74 83 64 89 50 89 C36 89 26 83 26 71 C26 64 30 52 50 52Z M39.7 70.3 m-3.4 0 a3.4 3 0 1 0 6.8 0 a3.4 3 0 1 0 -6.8 0 M60.7 70.3 m-3.4 0 a3.4 3 0 1 0 6.8 0 a3.4 3 0 1 0 -6.8 0" fill="#fbfdff" opacity=".95" stroke="#dfe9f4" stroke-width="1.2"/></g>`;
   const hand=pose.prop?(PROP[pose.prop]||(ITEMS.find(i=>i.id===pose.prop)||{}).art):(eq.hand?(ITEMS.find(i=>i.id===eq.hand)||{}).art:null);
-  if(hand){const big=pose.prop==="guitar"||pose.prop==="bear";const a=big?[50,112,1.25]:ANCH[W()].hand;out+=`<g transform="translate(${a[0]},${a[1]}) scale(${a[2]})">${hand}</g>`}
+  if(hand){const big=pose.prop==="guitar"||pose.prop==="bear";const a=big?[50,112,1.25]:ANCH[W()].hand;out+=`<g ${!pose.prop&&eq.hand?'class="eqi" data-slot="hand"':""} transform="translate(${a[0]},${a[1]}) scale(${a[2]})">${!pose.prop&&eq.hand?'<rect x="-22" y="-22" width="44" height="44" fill="transparent"/>':""}${hand}</g>`}
   return out}
-function drawChar(){document.body.classList.toggle("out",!!S.out);const c=$("char");c.className="char "+(pose.cls||"");c.innerHTML=`<svg viewBox="-10 -40 120 190" aria-label="${NM[W()]}">${charInner()}</svg>${S.hb&&S.hb.germ?GERM:""}`;const [x,y]=SPOT[pose.at]||SPOT.center;c.style.left=(x/360*100)+"%";c.style.bottom=((320-y)/320*100)+"%";c.style.opacity=S.out?0:1}
+let eqBound=false;
+function drawChar(){if(!eqBound){eqBound=true;$("char").addEventListener("click",e=>{const g=e.target.closest&&e.target.closest(".eqi");if(!g||busy||S.out)return;e.stopPropagation();const sl=g.dataset.slot,eq=S.equip[W()]||{},id=eq[sl];if(!id)return;const it=ITEMS.find(i=>i.id===id);
+  eq[sl]=undefined;S.equip[W()]=eq;save();try{SFX.pop()}catch(x){}try{floatUp($("char"),[itemSVG(it)])}catch(x){}drawChar();toast("「"+(it?it.name:"아이템")+"」 옷장에 쏙 넣었어요")})}
+ document.body.classList.toggle("out",!!S.out);const c=$("char");c.className="char "+(pose.cls||"");c.innerHTML=`<svg viewBox="-10 -40 120 190" aria-label="${NM[W()]}">${charInner()}</svg>${S.hb&&S.hb.germ?GERM:""}`;const [x,y]=SPOT[pose.at]||SPOT.center;c.style.left=(x/360*100)+"%";c.style.bottom=((320-y)/320*100)+"%";c.style.opacity=S.out?0:1}
 function setPose(p){pose=Object.assign({prop:null,mask:false,cls:"",at:pose.at},p);drawRoom()}
 const idle=()=>setPose({prop:null,mask:false,cls:"",at:"center"});
 // ================= room scene
@@ -555,8 +560,9 @@ function habits(ev){const h=S.hb||{};const br=h.brushN||0;return [
  ["장난감 정리",(S.toys||0)===0,S.toys?S.toys+"개 남음":""],
  ["일찍 자기 (밤 10시 전)",ev?S.t<22*60:false,ev?"":"자러 갈 때 확인"]]}
 const TOYART=[PROP.block,`<rect x="-12" y="-5" width="24" height="9" rx="4" fill="#9fd8ff" stroke="${OL}" stroke-width="1.6"/><path d="M-7 -5 L-4 -10 L5 -10 L8 -5" fill="#c4e7ff" stroke="${OL}" stroke-width="1.6"/><circle cx="-6" cy="6" r="3" fill="#fff" stroke="${OL}" stroke-width="1.5"/><circle cx="6" cy="6" r="3" fill="#fff" stroke="${OL}" stroke-width="1.5"/>`,`<circle r="9" fill="#ffb8cc" stroke="${OL}" stroke-width="1.6"/><path d="M-9 0 Q0 -5 9 0 M0 -9 Q4 0 0 9" fill="none" stroke="#fff" stroke-width="1.6"/>`];
-function drawToys(){document.querySelectorAll(".toy").forEach(e=>e.remove());for(let i=0;i<(S.toys||0);i++){const t=document.createElement("button");t.className="mess toy";t.setAttribute("aria-label","장난감");t.style.left=(8+((i*37+13)%70))+"%";t.style.bottom=(3+(i%3)*7)+"%";t.innerHTML=`<svg viewBox="-14 -14 28 28">${TOYART[i%3]}</svg>`;
-  t.addEventListener("click",e=>{e.stopPropagation();SFX.pop();ono(pick(["쏙!","쏙쏙"]),e.clientX,e.clientY,"green");S.toys=Math.max(0,(S.toys||0)-1);save();t.remove();if(!S.toys){toast("장난감 정리 끝! 깨끗해요");add({mood:4})}drawTodo();drawMenu()});$("room").appendChild(t)}}
+function drawToyBox(){const b=document.getElementById("toybox");if(!b)return;const n=S.toys||0;b.classList.toggle("has",n>0);document.getElementById("toyN").textContent=n}
+function drawToys(){drawToyBox();document.querySelectorAll(".toy").forEach(e=>e.remove());for(let i=0;i<(S.toys||0);i++){const t=document.createElement("button");t.className="mess toy";t.setAttribute("aria-label","장난감");t.style.left=(8+((i*37+13)%70))+"%";t.style.bottom=(3+(i%3)*7)+"%";t.innerHTML=`<svg viewBox="-14 -14 28 28">${TOYART[i%3]}</svg>`;
+  t.addEventListener("click",e=>{e.stopPropagation();SFX.pop();ono(pick(["쏙!","쏙쏙"]),e.clientX,e.clientY,"green");S.toys=Math.max(0,(S.toys||0)-1);save();{const bx=document.getElementById("toybox").getBoundingClientRect(),tr=t.getBoundingClientRect();t.style.pointerEvents="none";t.style.transition="transform .45s ease-in,opacity .45s";t.style.transform=`translate(${bx.left+bx.width/2-tr.left-tr.width/2}px,${bx.top+bx.height*.3-tr.top-tr.height/2}px) scale(.4)`;t.style.opacity=".2";setTimeout(()=>{t.remove();const B=document.getElementById("toybox");B.classList.remove("pop");void B.offsetWidth;B.classList.add("pop");drawToyBox()},450)}if(!S.toys){toast("장난감 정리 끝! 깨끗해요");add({mood:4})}drawTodo();drawMenu()});$("room").appendChild(t)}}
 function spawnToys(n){S.toys=Math.min(6,(S.toys||0)+n);save();drawToys()}
 function openStamps(){const REW=["무지개 스티커","강아지 리본","별 모빌","하트 쿠션","꽃 화분","반짝 이불","칭찬 왕관"];const n=S.stamps||0;
  const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="sheet"><div style="display:flex;justify-content:space-between;align-items:center"><h3>칭찬 도장판</h3><button class="btn ghost sm" id="sc">닫기</button></div><p class="sub">하루 동안 좋은 습관 6가지를 모두 지키면 자고 일어날 때 도장을 받아요. 도장마다 방에 선물이 생겨요.${n>7?" · 지금까지 도장 "+n+"개":""}</p>
@@ -580,7 +586,7 @@ const ACT={
   const had=S.hb.germ;S.hb.germ=false;S.hb.brushN=(S.hb.brushN||0)+1;save();drawChar();if(had)toast("충치균이 도망갔어요!");drawTodo();finish("반짝!","gold",{clean:6,mood:6},5,"양치",["spark","star","spark"])},
  async water(){if((S.hb.water||0)>=8){toast("물을 많이 마셨어요. 배가 출렁출렁~");lock(false);return}setPose({prop:"cup",cls:""});for(const w of["꿀꺽","꿀꺽꿀꺽","캬~"]){say(w,"blue",(Math.random()-.5)*40);SFX.bub();await wait(500)}S.hb.water=(S.hb.water||0)+1;save();if(S.hb.water===5)toast("물 5컵 완료!");drawTodo();finish(null,"",{hp:3,clean:1},5,"물 마시기",["drop"])},
  async dogfood(){if(S.hb.dogFed){toast("강아지는 오늘 밥을 먹었어요. 배가 빵빵!");onoAt($("dog"),"꺼억","brown");lock(false);return}dogBusy=true;setPose({prop:"kibble",cls:""});onoAt($("dog"),"멍멍!","brown");dogClass("hop");dogTo(165);await wait(800);dogClass("wag");for(const w of["와구와구","냠냠","와구와구!"]){onoAt($("dog"),w,"brown");SFX.pop();await wait(550)}S.hb.dogFed=true;save();dogBusy=false;floatUp($("dog"),[ps("heart"),ps("heart")]);drawTodo();finish(null,"",{mood:8},10,"강아지 밥 주기",["heart"])},
- toys(){lock(false);if(!S.toys)toast("정리할 장난감이 없어요. 깨끗!");else toast("바닥의 장난감을 눌러서 쏙쏙 정리해요")},
+ toys(){lock(false);if(!S.toys)toast("정리할 장난감이 없어요. 깨끗!");else toast("바닥의 장난감을 눌러서 TOY 통에 쏙쏙 넣어요")},
  async meal(){if(!handsOK())return;const s=slot();const side=await pickSide();setPose({prop:"rice",cls:"bob"});await tapGame({label:"한 숟갈씩 냠냠",btn:"냠!",need:5,onTap:n=>{SFX.pop();say(["냠","냠냠","얌얌","쩝쩝","꿀꺽"][n-1],"",(n%2?-28:28))}});
   setPose({prop:side[0],cls:"bob"});for(let i=0;i<2;i++){say(side[2],side[3]?"green":"gold",i?26:-26);SFX.pop();await wait(550)}if(side[3])S.hb.veg=(S.hb.veg||0)+1;afterEat();if(s)mark("meal");finish(side[3]?"골고루 냠냠!":"배불러~ 끄억","gold",{full:40,mood:side[3]?12:5,hp:side[3]?5:0},45,"밥 먹기("+side[1]+")",side[3]?["leaf","heart"]:["steam","heart"])},
  async ramen(){if(!handsOK())return;setPose({prop:null,cls:"",at:"center"});let t=0,on=true;panel(`라면 끓이는 중… <div class="clock" id="rc">0:00</div>3분에 맞춰 불을 꺼요!<div class="row"><button class="btn sm lamp" id="off">불 끄기!</button></div>`);
