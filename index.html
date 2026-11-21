@@ -242,6 +242,7 @@ function pool(c){const cats=c==="all"?Object.keys(BASE):[c];const out=[];cats.fo
 let AC=null;function ac(){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}catch(e){return null}}
 function tone(f,t0,d,v,type){const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(t0||0);o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v||.06,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(c.destination);o.start(t);o.stop(t+d+.02)}
 const tick=()=>tone(1500,0,.04,.05);
+const bbok=()=>{const c=ac();if(!c)return;[[0,420,1100],[.09,560,1500]].forEach(([d,f1,f2])=>{const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+d;o.type="sine";o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+.06);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.09,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.08);o.connect(g).connect(c.destination);o.start(t);o.stop(t+.1)})};
 const fanfare=()=>[1047,1319,1568,2093].forEach((f,i)=>{tone(f,i*.09,.5,.05);tone(f*2,i*.09,.3,.012)});
 // ===== fx
 function ono(t,x,y,stroke){const d=document.createElement("div");d.className="ono";d.textContent=t;if(stroke)d.style.webkitTextStrokeColor=stroke;d.style.left=x+"px";d.style.top=y+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1050)}
@@ -410,7 +411,7 @@ const TABS=[["pEat","뭐 먹지",`<svg viewBox="-14 -14 28 28"><path d="M-11 -1 
  ["pTrip","강경 여행",PIN("#c4e7ff")]];
 let tab="pEat";
 function drawTabs(){$("tabbar").innerHTML=TABS.map(([id,n,ic])=>`<button role="tab" aria-selected="${tab===id}" data-t="${id}">${ic}<span>${n}</span></button>`).join("");
- $("tabbar").querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;TABS.forEach(([id])=>$(id).hidden=id!==tab);if(tab==="pEdit")drawEdit();if(tab==="pEat")drawWheel();drawTabs();scrollTo(0,0)}))}
+ $("tabbar").querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{try{bbok()}catch(e){}tab=b.dataset.t;TABS.forEach(([id])=>$(id).hidden=id!==tab);if(tab==="pEdit")drawEdit();if(tab==="pEat")drawWheel();drawTabs();scrollTo(0,0)}))}
 // ===== 제휴 쿠폰 (partners.json, 쿠폰 받을 때마다 번호 자동 생성)
 const PARTNER_URL="https://kyk505417-sys.github.io/ojeot/partners.json";
 let PARTNERS=[];
