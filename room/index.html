@@ -170,6 +170,7 @@ button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 #hotDoor{z-index:30!important}
 body.out #char{pointer-events:none}
+.must{margin-top:10px;background:#fff4f8;border:2px dashed #ffc6d6;border-radius:14px;padding:8px 10px}.must b{display:block;font-weight:400;color:#e3527a;font-size:14px;margin-bottom:6px}.must div{display:flex;flex-wrap:wrap;gap:6px}.must button{border:0;border-radius:99px;padding:6px 12px;background:#fff;color:#6a4a5e;font-family:inherit;font-size:14px;box-shadow:0 2px 0 #ffd6e2}.must button:active{transform:scale(.95)}.must button.ok{background:#e3f7ea;color:#3aa874;box-shadow:none;text-decoration:line-through;text-decoration-color:#3aa87488}
 </style>
 
 <div class="app">
@@ -342,7 +343,15 @@ const iga=n=>{const c=n.charCodeAt(n.length-1)-44032;return n+(c>=0&&c%28?"이":
 const MASKOFF={o:[0,0],g:[4,2],m:[-4,-4]};
 const START_OWN=["nightcap","ribbon","scarf","bandana"];
 function owned(){const o=new Set(S.owned||START_OWN);try{const w=JSON.parse(localStorage.getItem("ojeot-walk-v1")||"null");if(w&&w.items)Object.keys(w.items).forEach(id=>o.add(id))}catch(e){}return o}
-function giveItem(src){const own=owned();const left=ITEMS.filter(i=>!own.has(i.id));const it=left.length?pick(left):pick(ITEMS);S.owned=[...new Set([...(S.owned||START_OWN),it.id])];const eq=S.equip[W()]=S.equip[W()]||{};eq[it.slot]=it.id;save();drawChar();SFX.done();say("두근두근","gold");setTimeout(()=>{say("득템!","gold");floatUp($("char"),[itemSVG(it),ps("spark")])},600);toast(src+"에서 「"+it.name+"」"+(it.name.charCodeAt(it.name.length-1)>=44032&&(it.name.charCodeAt(it.name.length-1)-44032)%28?"이":"가")+" 나왔어요 · 옷장에 들어갔어요");return it}
+const FOOD={dongas:"바삭바삭",bowl:"후루룩",coffee:"홀짝"};
+function askEat(it){if(!FOOD[it.id])return;setTimeout(()=>{const m=document.createElement("div");m.className="modal";m.style.cssText="position:fixed;inset:0;z-index:999;background:#0006;display:grid;place-items:center";
+ m.innerHTML=`<div style="background:#fffaff;border-radius:22px;padding:20px;width:min(86vw,320px);text-align:center;box-shadow:0 8px 20px #0004"><svg viewBox="-24 -24 48 48" style="width:90px;height:90px">${it.art}</svg><div style="font-size:19px;color:#e3527a;margin:6px 0">「${it.name}」 도착!</div><div style="font-size:15px;color:#8a7a9a;margin-bottom:14px">${it.id==="coffee"?"지금 마실까요?":"식사하시겠습니까?"}</div><div style="display:flex;gap:8px;justify-content:center"><button id="eNo" style="border:0;border-radius:99px;padding:10px 16px;background:#efe9f7;color:#6a5a7a;font-size:15px;font-family:inherit">나중에</button><button id="eYes" style="border:0;border-radius:99px;padding:10px 18px;background:#ff8fab;color:#fff;font-size:15px;font-family:inherit;box-shadow:0 3px 0 #e9739a">${it.id==="coffee"?"마실래요!":"먹을래요!"}</button></div></div>`;
+ document.body.appendChild(m);m.querySelector("#eNo").onclick=()=>{m.remove();toast("옷장에 넣어 둘게요")};
+ m.querySelector("#eYes").onclick=async()=>{m.remove();if(busy)return;lock(true);const eq=S.equip[W()]||{};eq.hand=it.id;S.equip[W()]=eq;drawChar();setPose({cls:"bob"});
+  for(const w of (it.id==="coffee"?["홀짝","홀짝홀짝","캬~"]:it.id==="bowl"?["후루룩","후루룩!","캬~"]:["옴","뇸뇸","바삭바삭!"])){say(w,"",(Math.random()-.5)*50);SFX.pop();await wait(550)}
+  eq.hand=undefined;save();drawChar();const s=slot();if(it.id!=="coffee"&&s)mark("meal");
+  finish(it.id==="coffee"?"향긋~":"잘 먹었습니다!","gold",it.id==="coffee"?{mood:10,hp:5}:{full:25,mood:8},15,it.name+" 먹기",["heart","spark"])}},1500)}
+function giveItem(src){const own=owned();const left=ITEMS.filter(i=>!own.has(i.id));const it=left.length?pick(left):pick(ITEMS);S.owned=[...new Set([...(S.owned||START_OWN),it.id])];const eq=S.equip[W()]=S.equip[W()]||{};eq[it.slot]=it.id;save();drawChar();SFX.done();say("두근두근","gold");setTimeout(()=>{say("득템!","gold");floatUp($("char"),[itemSVG(it),ps("spark")])},600);toast(src+"에서 「"+it.name+"」"+(it.name.charCodeAt(it.name.length-1)>=44032&&(it.name.charCodeAt(it.name.length-1)-44032)%28?"이":"가")+" 나왔어요 · 옷장에 들어갔어요");askEat(it);return it}
 function pickWho(first){const m=document.createElement("div");m.className="modal";const LINE={o:"강경 토박이 길치 오징어젓",g:"유학파 패션리더 꼴뚜기젓",m:"알이 톡 터진 명란젓"};
  m.innerHTML=`<div class="sheet"><h3>누구랑 놀까요?</h3><p class="sub">${first?"함께 하루를 보낼 친구를 골라요":"캐릭터를 바꿔도 방과 도장은 그대로예요"}</p><div class="whogrid">${Object.keys(NM).map(k=>`<button class="whob" aria-pressed="${k===W()&&!first}" data-k="${k}"><img src="${IMG[k]}" alt=""><span>${NM[k]}</span><small>${LINE[k]}</small></button>`).join("")}</div>${first?"":`<button class="btn ghost" id="whox">닫기</button>`}</div>`;
  document.body.appendChild(m);if(!first)$("whox").addEventListener("click",()=>m.remove());
@@ -502,13 +511,18 @@ const SUBICO=k=>{if(k==="SLEEP")return ICO.sleep;if(k==="wash")return ICO.wash;i
 let cat=null,busy=false;
 function pending(){const s=slot();const out={};if(S.ao){if(!S.ao.cloth||!S.ao.hands||!S.ao.wash)out.wash=1;if(!S.ao.laundry)out.house=1}if(S.hb&&S.hb.germ)out.wash=1;if(S.toys>0)out.house=1;if(!s)return out;const td=S.todo[s]||{};
   if(!td.meal)out.eat=1;if((S.dogN[s]||0)<10)out.family=1;if(s==="저녁"){if(!S.readToday)out.study=1;if(!S.diaryDone)out.study=1;if(!S.washed)out.wash=1}return out}
+function must(){const L=[];const s=slot();if(S.ao){L.push(["undress","옷 갈아입기",S.ao.cloth],["hands","손 씻기",S.ao.hands],["wash","씻기",S.ao.wash],["laundry","빨래",S.ao.laundry])}
+ if(S.hb&&S.hb.germ)L.push(["brush","양치",false]);if(S.toys>0)L.push(["toys","장난감 정리",false]);
+ if(s){const td=S.todo[s]||{};L.push(["meal",s+"밥 먹기",!!td.meal],["dog","강아지 공 던지기",(S.dogN[s]||0)>=10]);if(s==="저녁")L.push(["read","책 읽기",!!S.readToday],["wash","씻기",!!S.washed],["diary","일기 쓰기",!!S.diaryDone])}
+ const seen={};return L.filter(([k])=>seen[k]?0:(seen[k]=1))}
+document.addEventListener("dogtap",()=>{if(busy)return;if(S.out)return toast("먼저 방에 들어와요");try{onoAt($("dog"),"멍멍!","brown")}catch(e){}cat="family";try{SFX.pop()}catch(e){}drawMenu();$("menu").scrollIntoView({behavior:"smooth",block:"nearest"})});
 function drawMenu(){const m=$("menu"),pd=pending();
   if(!cat){m.innerHTML=`<div class="grid">${CATS.map(([k,n])=>`<button class="a" data-cat="${k}" ${busy?"disabled":""}>${pd[k]?'<i class="dot"></i>':""}<svg viewBox="-18 -18 36 36" aria-hidden="true">${ICO[k]}</svg><span>${n}</span></button>`).join("")}
      <button class="a" data-cat="sleep" ${busy?"disabled":""}><svg viewBox="-18 -18 36 36" aria-hidden="true">${ICO.sleep}</svg><span>잠자기</span></button><button class="a" data-cat="door" ${busy?"disabled":""}><svg viewBox="-18 -18 36 36" aria-hidden="true">${ICO.door}</svg><span>${S.out?"들어오기":"문"}</span></button></div>`;
    m.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.cat;if(k==="sleep")return runAct("sleep");if(k==="door")return doorTap();if(S.out)return toast("먼저 방에 들어와요");cat=k;SFX.pop();drawMenu()}));return}
   const name=(CATS.find(c=>c[0]===cat)||[0,"체력 충전"])[1];
   m.innerHTML=`<div class="mhead"><button class="back" id="back">← 뒤로</button><span>${name}</span></div><div class="grid">${SUB[cat].map(([k,n,ic])=>`<button class="a" data-act="${k}" ${busy?"disabled":""}><svg viewBox="-18 -18 36 36" aria-hidden="true">${SUBICO(ic)}</svg><span>${n}</span></button>`).join("")}</div>`;
-  $("back").addEventListener("click",()=>{cat=null;drawMenu()});
+  {const ms=must();if(ms.length&&ms.some(x=>!x[2])){m.insertAdjacentHTML("beforeend",`<div class="must"><b>📌 꼭 할 일</b><div>${ms.map(([k,n,d])=>`<button data-act="${k}" class="${d?"ok":""}" ${busy||d?"disabled":""}>${d?"✓ ":""}${n}</button>`).join("")}</div></div>`)}}$("back").addEventListener("click",()=>{cat=null;drawMenu()});
   m.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click",()=>runAct(b.dataset.act)))}
 let todoTab=null;
 function drawTodo(){const s=slot();const tab=todoTab||s||"아침";const td=S.todo[tab]||{};const dn=S.dogN[tab]||0;
@@ -715,4 +729,8 @@ try{fetch(URL_EV+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.
  m.innerHTML='<div style="background:#fffaff;border-radius:22px;padding:22px 20px;width:min(86vw,320px);text-align:center;box-shadow:0 8px 20px #0004"><div style="font-size:20px;color:#e3527a;margin-bottom:8px">처음부터 다시 할까요?</div><div style="font-size:14px;color:#8a7a9a;line-height:1.6;margin-bottom:16px">하루 날짜·게이지·도장·일기·옷이<br>모두 처음으로 돌아가요.</div><div style="display:flex;gap:8px;justify-content:center"><button id="rsNo" style="border:0;border-radius:99px;padding:10px 18px;background:#efe9f7;color:#6a5a7a;font-size:16px;font-family:inherit">아니요</button><button id="rsYes" style="border:0;border-radius:99px;padding:10px 18px;background:#ff8fab;color:#fff;font-size:16px;font-family:inherit;box-shadow:0 3px 0 #e9739a">처음부터!</button></div></div>';
  document.body.appendChild(m);m.querySelector("#rsNo").onclick=()=>m.remove();m.addEventListener("click",e=>{if(e.target===m)m.remove()});
  m.querySelector("#rsYes").onclick=()=>{try{localStorage.removeItem("ojeot-room-v2")}catch(e){}location.reload()};});})();
+</script>
+<script>
+(function(){const d=document.getElementById("dog");if(!d)return;d.style.cursor="pointer";d.style.pointerEvents="auto";d.style.zIndex=4;
+ d.addEventListener("click",e=>{e.stopPropagation();document.dispatchEvent(new CustomEvent("dogtap"))});})();
 </script>
