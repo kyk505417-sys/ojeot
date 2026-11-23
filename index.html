@@ -340,7 +340,7 @@ const ICON={heart:`<svg viewBox="-12 -12 24 24"><path d="M0 8 C-11 1 -9 -8 -4 -8
  trash:`<svg viewBox="-12 -12 24 24"><path d="M-6 -4 L-5 9 H5 L6 -4Z" fill="#c9f0d8" stroke="${OL}" stroke-width="1.6" stroke-linejoin="round"/><rect x="-8" y="-7" width="16" height="3.4" rx="1.4" fill="#9fe0b9" stroke="${OL}" stroke-width="1.5"/><path d="M-2.5 -7 V-9.5 H2.5 V-7" fill="none" stroke="${OL}" stroke-width="1.5"/><path d="M-2 -1 V6 M2 -1 V6" stroke="#5cb88a" stroke-width="1.5" stroke-linecap="round"/></svg>`};
 function drawLegend(){const e=$("legend");if(!e||e.dataset.ok)return;e.dataset.ok=1;const I=k=>`<span class="li">${ICON[k]}</span>`;e.innerHTML=`${I("heart")} 좋아하는 음식 (돌림판 칸이 두 배)<br>${I("x")} 싫어하는 음식 (돌림판에서 빠져요)<br>${I("trash")} 메뉴 지우기 (되돌리기 버튼으로 복구)<br>편집한 내용은 이 폰에 저장돼요.`}
 function drawEdit(){drawLegend();$("etabs").innerHTML=CATS.filter(c=>c[0]!=="all").map(([k,n])=>`<button class="chip" aria-pressed="${ecat===k}" data-k="${k}">${n}</button>`).join("");
- $("etabs").querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{ecat=b.dataset.k;drawEdit()}));
+ $("etabs").querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{ecat=b.dataset.k;popk(ecat);drawEdit()}));
  const mine=S.add[ecat]||[];
  $("items").innerHTML=menusOf(ecat).map(n=>{const f=S.fav.includes(n),x=S.ban.includes(n),own=mine.includes(n);return `<li class="${x?"ban":""}"><span>${n}</span>
   <button class="ib fav" aria-pressed="${f}" aria-label="${n} 좋아요" data-a="fav" data-n="${n}">${f?ICON.heart:ICON.heartOff}</button>
