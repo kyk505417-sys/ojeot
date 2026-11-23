@@ -280,7 +280,7 @@ function setup(){CHI=-1;
 }
 function stepCab(){chips(0);say("배추부터!");yl("{cab} 콕! {board} 위에 탁~");icon("cab","glow");const g=iconXY("cab");finger("t",g.x-14,g.y-g.w*.9);
  ICONTAP=k=>{if(k!=="cab")return false;ICONTAP=null;finger();icon("cab","used");
-  const t=iconXY("cab");sp("cab","cab",{x:t.x,y:t.y,w:t.w*.4,h:t.w*.4*1.55,r:-20,o:0,z:39});requestAnimationFrame(()=>requestAnimationFrame(()=>sp("cab",null,{x:W*.5,y:CY,w:W*.2,h:W*.2*1.55,r:-90,o:1,z:5})));setTimeout(()=>{pop("턱!",W*.5,CY-W*.2);tone(300,.1,.12);setTimeout(step0,400)},650)};
+  const t=iconXY("cab");sp("cab","cab",{x:t.x,y:t.y,w:t.w*.4,h:t.w*.4*1.55,r:-20,o:0,z:39});requestAnimationFrame(()=>requestAnimationFrame(()=>sp("cab",null,{x:W*.5,y:CY,w:W*.2,h:W*.2*1.55,r:-90,o:1,z:5})));setTimeout(()=>{pop("턱!",W*.5,CY-W*.2);tone(300,.1,.12);ding();setTimeout(step0,400)},650)};
 }
 /* 1. 배추 반 가르기 */
 function step0(){chips(0);say("영차영차~");yl("{knife} 슈웅~ {cab} 반 가르기!");
